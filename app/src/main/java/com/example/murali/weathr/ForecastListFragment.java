@@ -21,16 +21,14 @@ import android.widget.TextView;
 
 import com.example.murali.weathr.database.WeatherDatabase;
 
-import java.util.WeakHashMap;
-
 /**
  * Created by Murali on 18-08-2015.
  */
 public class ForecastListFragment extends Fragment {
-    RecyclerView mRecyclerView;
     static RecyclerView.Adapter mAdapter;
-    RecyclerView.LayoutManager mLayoutManager;
     static String[] weekForecast = {"Blah", "Blah", "Blah", "Blah", "Blah", "Blah", "Blah", "Blah"};
+    RecyclerView mRecyclerView;
+    RecyclerView.LayoutManager mLayoutManager;
 
     void setWeekForecast(String[] forecast) {
         weekForecast = forecast;
@@ -57,43 +55,6 @@ public class ForecastListFragment extends Fragment {
         mAdapter = new ForecastAdapter(weekForecast);
         mRecyclerView.setAdapter(mAdapter);
         return view;
-    }
-
-    class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
-        String[] forecast;
-
-        public ForecastAdapter(String[] forecast) {
-            this.forecast = forecast;
-        }
-
-        @Override
-        public ForecastAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(getActivity()).inflate(R.layout.single_forecast_row, parent, false);
-            ViewHolder viewHolder = new ViewHolder(view);
-            return viewHolder;
-        }
-
-        @Override
-        public void onBindViewHolder(ForecastAdapter.ViewHolder holder, int position) {
-            holder.textView.setText(forecast[position]);
-        }
-
-        @Override
-        public int getItemCount() {
-            return forecast.length;
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            ImageView imageView;
-            TextView textView;
-
-            public ViewHolder(View itemView) {
-                super(itemView);
-                imageView = (ImageView) itemView.findViewById(R.id.singleForecastImageView);
-                textView = (TextView) itemView.findViewById(R.id.singlePrimaryForecastTextView);
-
-            }
-        }
     }
 
     @Override
@@ -129,5 +90,50 @@ public class ForecastListFragment extends Fragment {
         String location = sharedPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default_value));
         FetchWeatherTask task = new FetchWeatherTask(this);
         task.execute(location);
+    }
+
+    class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
+        String[] forecast;
+
+        public ForecastAdapter(String[] forecast) {
+            this.forecast = forecast;
+        }
+
+        @Override
+        public ForecastAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(getActivity()).inflate(R.layout.single_forecast_row, parent, false);
+            ViewHolder viewHolder = new ViewHolder(view);
+            return viewHolder;
+        }
+
+        @Override
+        public void onBindViewHolder(ForecastAdapter.ViewHolder holder, int position) {
+            holder.textView.setText(forecast[position]);
+        }
+
+        @Override
+        public int getItemCount() {
+            return forecast.length;
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+            ImageView imageView;
+            TextView textView;
+
+            public ViewHolder(View itemView) {
+                super(itemView);
+                imageView = (ImageView) itemView.findViewById(R.id.singleForecastImageView);
+                textView = (TextView) itemView.findViewById(R.id.singlePrimaryForecastTextView);
+                textView.setOnClickListener(this);
+
+            }
+
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                startActivity(intent);
+
+            }
+        }
     }
 }
