@@ -23,6 +23,10 @@
         <activity
             android:name=".DetailActivity"
             android:screenOrientation="portrait"></activity>
+
+        <provider
+            android:name=".database.WeatherProvider"
+            android:authorities="com.example.murali.weathr"></provider>
     </application>
 
 </manifest>

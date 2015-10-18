@@ -14,7 +14,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * Created by Murali on 08-07-2015.
@@ -28,11 +30,13 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     public static final String API_AMPERSAND = "&";
     public static final String API_UNIT = "metric";
     public static final String API_DAY_COUNT = "7";
+    public static final String APP_ID = "789c7a808690dc32dbf1324ad4b2e1e3";
 
-    String[] forecastData = {"Just","Get","Lost"};
+
+    String[] forecastData;
     ForecastListFragment fragment;
 
-    FetchWeatherTask(ForecastListFragment fragment){
+    FetchWeatherTask(ForecastListFragment fragment) {
         this.fragment = fragment;
     }
 
@@ -43,6 +47,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
                     .appendQueryParameter("q", location[0])
                     .appendQueryParameter("units", API_UNIT)
                     .appendQueryParameter("cnt", API_DAY_COUNT)
+                    .appendQueryParameter("appid", APP_ID)
                     .build().toString();
             Log.i(TAG, url);
             URL apiUrl = new URL(url);
@@ -85,8 +90,8 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
     private String[] parseJsonData(String jsonString) throws JSONException {
         String[] weeklyForecast = new String[7];
-        Calendar calendar = Calendar.getInstance();
-        calendar.get(Calendar.DAY_OF_WEEK);
+
+
         for (int i = 0; i < 7; i++) {
             JSONObject cityWeather = new JSONObject(jsonString);
             JSONArray weekForecaast = cityWeather.getJSONArray("list");
@@ -94,14 +99,23 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             JSONObject mainForecast = dayForecast.getJSONObject("temp");
             Double minTemp = mainForecast.getDouble("min");
             Double maxTemp = mainForecast.getDouble("max");
-            int day = calendar.get(Calendar.DAY_OF_WEEK);
-            String forecastData = "Min : " + minTemp +" " + "Max : " + maxTemp;
+            String day = getDay(i);
+            String forecastData = "Min : " + minTemp + " " + "Max : " + maxTemp;
             weeklyForecast[i] = forecastData;
-            Log.i(TAG,""+day);
+            Log.i(TAG, day);
             //Log.i(TAG, "" + minTemp);
             //Log.i(TAG, "" + maxTemp);
 
         }
         return weeklyForecast;
+    }
+
+    public String getDay(int i) {
+        Calendar calendar = new GregorianCalendar();
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE dd-MMM-yyyy");
+        calendar.add(Calendar.DAY_OF_MONTH, i);
+        return sdf.format(calendar.getTime());
+
+
     }
 }

@@ -32,8 +32,8 @@ public class ForecastListFragment extends Fragment {
 
     void setWeekForecast(String[] forecast) {
         weekForecast = forecast;
-        mAdapter = new ForecastAdapter(forecast);
-        mAdapter.notifyDataSetChanged();
+        mAdapter = new ForecastAdapter(weekForecast);
+        //mAdapter.notifyDataSetChanged();
         mRecyclerView.setAdapter(mAdapter);
 
     }
@@ -89,7 +89,7 @@ public class ForecastListFragment extends Fragment {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String location = sharedPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default_value));
         FetchWeatherTask task = new FetchWeatherTask(this);
-        task.execute(location);
+        task.execute("Surat");
     }
 
     class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
