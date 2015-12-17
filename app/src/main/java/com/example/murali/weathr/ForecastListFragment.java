@@ -1,8 +1,13 @@
 package com.example.murali.weathr;
 
 import android.app.Fragment;
+import android.app.LoaderManager;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -17,14 +22,43 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.example.murali.weathr.database.WeatherDatabase;
+import com.example.murali.weathr.database.WeatherContract;
+import com.example.murali.weathr.database.WeatherDatabaseHelper;
 
 /**
  * Created by Murali on 18-08-2015.
  */
-public class ForecastListFragment extends Fragment {
+public class ForecastListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+    static final int COL_WEATHER_ID = 0;
+    static final int COL_WEATHER_DATE = 1;
+    static final int COL_WEATHER_DESC = 2;
+    static final int COL_WEATHER_MAX_TEMP = 3;
+    static final int COL_WEATHER_MIN_TEMP = 4;
+    static final int COL_LOCATION_SETTING = 5;
+    static final int COL_WEATHER_CONDITION_ID = 6;
+    static final int COL_COORD_LAT = 7;
+    static final int COL_COORD_LONG = 8;
+    private static final int LIST_FRAGMENT_LOADER = 0;
+    private static final String[] FORECAST_COLUMNS = {
+            // In this case the id needs to be fully qualified with a table name, since
+            // the content provider joins the location & weather tables in the background
+            // (both have an _id column)
+            // On the one hand, that's annoying.  On the other, you can search the weather table
+            // using the location set by the user, which is only in the Location table.
+            // So the convenience is worth it.
+            WeatherContract.WeatherEntry.TABLE_NAME + "." + WeatherContract.WeatherEntry._ID,
+            WeatherContract.WeatherEntry.DATE,
+            WeatherContract.WeatherEntry.SHORT_DESCRIPTION,
+            WeatherContract.WeatherEntry.MAX_TEMP,
+            WeatherContract.WeatherEntry.MIN_TEMP,
+            WeatherContract.LocationEntry.LOCATION_CODE,
+            WeatherContract.WeatherEntry.WEATHER_ID,
+            WeatherContract.LocationEntry.COORD_LAT,
+            WeatherContract.LocationEntry.COORD_LONG
+    };
     static RecyclerView.Adapter mAdapter;
     static String[] weekForecast = {"Blah", "Blah", "Blah", "Blah", "Blah", "Blah", "Blah", "Blah"};
     RecyclerView mRecyclerView;
@@ -46,7 +80,7 @@ public class ForecastListFragment extends Fragment {
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Weathr");
         setHasOptionsMenu(true);
-        WeatherDatabase database = new WeatherDatabase(getActivity());
+        WeatherDatabaseHelper database = new WeatherDatabaseHelper(getActivity());
         database.getWritableDatabase();
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.forecastRecyclerView);
@@ -92,6 +126,25 @@ public class ForecastListFragment extends Fragment {
         task.execute("Surat");
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        String locationString = WeatherUtility.getPreferredLocation(getActivity());
+        String sortOrder = WeatherContract.WeatherEntry.DATE + " ASC";
+        Uri weatherForLocationUri = WeatherContract.WeatherEntry.weatherWithLocationUri(locationString);
+        return new CursorLoader(getActivity(), weatherForLocationUri, FORECAST_COLUMNS, null, null, sortOrder);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
     class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
         String[] forecast;
 
@@ -102,14 +155,15 @@ public class ForecastListFragment extends Fragment {
         @Override
         public ForecastAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(getActivity()).inflate(R.layout.single_forecast_row, parent, false);
-            ViewHolder viewHolder = new ViewHolder(view);
-            return viewHolder;
+            //ViewHolder viewHolder = new RecyclerView.ViewHolder(view);
+            return new ViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(ForecastAdapter.ViewHolder holder, int position) {
             holder.textView.setText(forecast[position]);
         }
+
 
         @Override
         public int getItemCount() {
@@ -119,9 +173,11 @@ public class ForecastListFragment extends Fragment {
         public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
             ImageView imageView;
             TextView textView;
+            RelativeLayout singleForecastRowLayout;
 
             public ViewHolder(View itemView) {
                 super(itemView);
+                singleForecastRowLayout = (RelativeLayout) itemView.findViewById(R.id.singleForecastRowLayout);
                 imageView = (ImageView) itemView.findViewById(R.id.singleForecastImageView);
                 textView = (TextView) itemView.findViewById(R.id.singlePrimaryForecastTextView);
                 textView.setOnClickListener(this);

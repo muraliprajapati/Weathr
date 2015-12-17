@@ -5,6 +5,7 @@ import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+
 /**
  * Created by Murali on 07/10/2015.
  */
@@ -16,7 +17,7 @@ public class WeatherContract {
     public static final String PATH_WEATHER = "weather";
     public static final String PATH_LOCATION = "location";
 
-    static class LocationEntry implements BaseColumns {
+    public static class LocationEntry implements BaseColumns {
         //Constants for Content Provider
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_LOCATION).build();
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_LOCATION;
@@ -36,7 +37,7 @@ public class WeatherContract {
 
     }
 
-    static class WeatherEntry implements BaseColumns {
+    public static class WeatherEntry implements BaseColumns {
         //Constants for Content Provider
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_WEATHER).build();
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_WEATHER;
@@ -60,7 +61,7 @@ public class WeatherContract {
 
         }
 
-        public static Uri weaatherWithLocationUri(String locationSetting) {
+        public static Uri weatherWithLocationUri(String locationSetting) {
             return CONTENT_URI.buildUpon().appendPath(locationSetting).build();
 
         }
@@ -70,7 +71,7 @@ public class WeatherContract {
 
         }*/
 
-        public static String getLocationSettingFromUri(Uri uri) {
+        public static String getLocationFromUri(Uri uri) {
             return uri.getPathSegments().get(1);
         }
 

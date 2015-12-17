@@ -32,7 +32,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     public static final String API_DAY_COUNT = "7";
     public static final String APP_ID = "789c7a808690dc32dbf1324ad4b2e1e3";
 
-
+    SimpleDateFormat sdf = new SimpleDateFormat("EEEE dd-MMM-yyyy");
     String[] forecastData;
     ForecastListFragment fragment;
 
@@ -99,10 +99,10 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             JSONObject mainForecast = dayForecast.getJSONObject("temp");
             Double minTemp = mainForecast.getDouble("min");
             Double maxTemp = mainForecast.getDouble("max");
-            String day = getDay(i);
+            long dayTime = getDay(i);
             String forecastData = "Min : " + minTemp + " " + "Max : " + maxTemp;
             weeklyForecast[i] = forecastData;
-            Log.i(TAG, day);
+
             //Log.i(TAG, "" + minTemp);
             //Log.i(TAG, "" + maxTemp);
 
@@ -110,11 +110,11 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         return weeklyForecast;
     }
 
-    public String getDay(int i) {
+    public long getDay(int i) {
         Calendar calendar = new GregorianCalendar();
-        SimpleDateFormat sdf = new SimpleDateFormat("EEEE dd-MMM-yyyy");
+
         calendar.add(Calendar.DAY_OF_MONTH, i);
-        return sdf.format(calendar.getTime());
+        return calendar.getTimeInMillis();
 
 
     }

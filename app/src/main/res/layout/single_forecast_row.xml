@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/singleForecastRowLayout"
     android:layout_width="match_parent"
     android:layout_height="72dp"
     android:layout_marginLeft="16dp"
@@ -12,17 +13,17 @@
         android:id="@+id/singleForecastImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/sun"
-        android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/sun" />
     <TextView
         android:id="@+id/singlePrimaryForecastTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/singleForecastImageView"
-        android:paddingTop="20dp"
         android:paddingLeft="16dp"
+        android:paddingTop="20dp"
         android:text="Hello"
         android:textSize="16sp"
         android:textStyle="bold" />
@@ -43,9 +44,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:paddingRight="16dp"
         android:paddingTop="20dp"
         android:text="MON"
-        android:paddingRight="16dp"
         android:textSize="14sp" />
 
 
