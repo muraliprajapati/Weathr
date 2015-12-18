@@ -21,9 +21,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.example.murali.weathr.database.WeatherContract;
 import com.example.murali.weathr.database.WeatherDatabaseHelper;
@@ -59,18 +56,10 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
             WeatherContract.LocationEntry.COORD_LAT,
             WeatherContract.LocationEntry.COORD_LONG
     };
-    static RecyclerView.Adapter mAdapter;
-    static String[] weekForecast = {"Blah", "Blah", "Blah", "Blah", "Blah", "Blah", "Blah", "Blah"};
+    ForecastAdapter mAdapter;
     RecyclerView mRecyclerView;
     RecyclerView.LayoutManager mLayoutManager;
 
-    void setWeekForecast(String[] forecast) {
-        weekForecast = forecast;
-        mAdapter = new ForecastAdapter(weekForecast);
-        //mAdapter.notifyDataSetChanged();
-        mRecyclerView.setAdapter(mAdapter);
-
-    }
 
     @Nullable
     @Override
@@ -84,9 +73,9 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
         database.getWritableDatabase();
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.forecastRecyclerView);
-        mLayoutManager = new LinearLayoutManager(getActivity());
+        mLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new ForecastAdapter(weekForecast);
+        mAdapter = new ForecastAdapter(getActivity());
         mRecyclerView.setAdapter(mAdapter);
         return view;
     }
@@ -136,60 +125,15 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        mAdapter.swapCursor(cursor);
 
 
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
+        mAdapter.swapCursor(null);
     }
 
-    class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
-        String[] forecast;
 
-        public ForecastAdapter(String[] forecast) {
-            this.forecast = forecast;
-        }
-
-        @Override
-        public ForecastAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(getActivity()).inflate(R.layout.single_forecast_row, parent, false);
-            //ViewHolder viewHolder = new RecyclerView.ViewHolder(view);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(ForecastAdapter.ViewHolder holder, int position) {
-            holder.textView.setText(forecast[position]);
-        }
-
-
-        @Override
-        public int getItemCount() {
-            return forecast.length;
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-            ImageView imageView;
-            TextView textView;
-            RelativeLayout singleForecastRowLayout;
-
-            public ViewHolder(View itemView) {
-                super(itemView);
-                singleForecastRowLayout = (RelativeLayout) itemView.findViewById(R.id.singleForecastRowLayout);
-                imageView = (ImageView) itemView.findViewById(R.id.singleForecastImageView);
-                textView = (TextView) itemView.findViewById(R.id.singlePrimaryForecastTextView);
-                textView.setOnClickListener(this);
-
-            }
-
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), DetailActivity.class);
-                startActivity(intent);
-
-            }
-        }
-    }
 }
