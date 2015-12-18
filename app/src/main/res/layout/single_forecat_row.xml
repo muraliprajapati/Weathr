@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="152dp"
+    android:layout_height="208dp"
+    android:paddingRight="8dp"
+    android:paddingTop="16dp">
+
+    <TextView
+        android:id="@+id/date_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#33b3e5"
+        android:paddingLeft="16dp"
+        android:text="Monday" />
+
+    <ImageView
+        android:id="@id/forecast_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/art_clear" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/forecast_image_view"
+        android:background="#33b3e5"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@id/description_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_weight="0"
+            android:text="Rainy" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@id/high_temp_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:text="18" />
+
+            <TextView
+                android:id="@id/low_temp_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:text="16" />
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>
