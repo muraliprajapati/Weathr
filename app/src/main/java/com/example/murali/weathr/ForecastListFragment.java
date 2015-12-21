@@ -23,7 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.murali.weathr.database.WeatherContract;
-import com.example.murali.weathr.database.WeatherDatabaseHelper;
 
 /**
  * Created by Murali on 18-08-2015.
@@ -36,16 +35,15 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
     static final int COL_WEATHER_MIN_TEMP = 4;
     static final int COL_LOCATION_SETTING = 5;
     static final int COL_WEATHER_CONDITION_ID = 6;
-    static final int COL_COORD_LAT = 7;
-    static final int COL_COORD_LONG = 8;
+    static final int COL_CITY_NAME = 7;
+    static final int COL_COORD_LAT = 8;
+    static final int COL_COORD_LONG = 9;
+
+
     private static final int LIST_FRAGMENT_LOADER = 0;
+
     private static final String[] FORECAST_COLUMNS = {
-            // In this case the id needs to be fully qualified with a table name, since
-            // the content provider joins the location & weather tables in the background
-            // (both have an _id column)
-            // On the one hand, that's annoying.  On the other, you can search the weather table
-            // using the location set by the user, which is only in the Location table.
-            // So the convenience is worth it.
+
             WeatherContract.WeatherEntry.TABLE_NAME + "." + WeatherContract.WeatherEntry._ID,
             WeatherContract.WeatherEntry.DATE,
             WeatherContract.WeatherEntry.SHORT_DESCRIPTION,
@@ -53,9 +51,13 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
             WeatherContract.WeatherEntry.MIN_TEMP,
             WeatherContract.LocationEntry.LOCATION_CODE,
             WeatherContract.WeatherEntry.WEATHER_ID,
+            WeatherContract.LocationEntry.CITY_NAME,
             WeatherContract.LocationEntry.COORD_LAT,
             WeatherContract.LocationEntry.COORD_LONG
     };
+
+    String locationQuery;
+
     ForecastAdapter mAdapter;
     RecyclerView mRecyclerView;
     RecyclerView.LayoutManager mLayoutManager;
@@ -69,8 +71,8 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Weathr");
         setHasOptionsMenu(true);
-        WeatherDatabaseHelper database = new WeatherDatabaseHelper(getActivity());
-        database.getWritableDatabase();
+        locationQuery = WeatherUtility.getPreferredLocation(getActivity());
+
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.forecastRecyclerView);
         mLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
@@ -89,7 +91,12 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onStart() {
         super.onStart();
-        //updateWeather();
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(LIST_FRAGMENT_LOADER, null, this);
     }
 
     @Override
@@ -111,8 +118,8 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
     public void updateWeather() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String location = sharedPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default_value));
-        FetchWeatherTask task = new FetchWeatherTask(this);
-        task.execute("Surat");
+        FetchWeatherTask task = new FetchWeatherTask(getActivity());
+        task.execute(location);
     }
 
     @Override
@@ -126,8 +133,6 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         mAdapter.swapCursor(cursor);
-
-
     }
 
     @Override

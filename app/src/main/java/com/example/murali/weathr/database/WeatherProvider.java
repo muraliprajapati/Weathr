@@ -173,6 +173,7 @@ public class WeatherProvider extends ContentProvider {
                 long id = database.insert(WeatherContract.WeatherEntry.TABLE_NAME, null, contentValues);
                 if (id > 0) {
                     returnUri = WeatherContract.WeatherEntry.weatherUri(id);
+                    getContext().getContentResolver().notifyChange(returnUri, null);
                 } else {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 }
@@ -182,6 +183,7 @@ public class WeatherProvider extends ContentProvider {
                 long id = database.insert(WeatherContract.LocationEntry.TABLE_NAME, null, contentValues);
                 if (id > 0) {
                     returnUri = WeatherContract.LocationEntry.locationUri(id);
+                    getContext().getContentResolver().notifyChange(returnUri, null);
                 } else {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 }
@@ -190,7 +192,7 @@ public class WeatherProvider extends ContentProvider {
 
 
         }
-        getContext().getContentResolver().notifyChange(uri, null);
+
         return returnUri;
     }
 

@@ -5,6 +5,10 @@ import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
 
 /**
  * Created by Murali on 07/10/2015.
@@ -16,6 +20,16 @@ public class WeatherContract {
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     public static final String PATH_WEATHER = "weather";
     public static final String PATH_LOCATION = "location";
+
+    public static long normalizeDate(long startDate) {
+
+        Calendar calendar = new GregorianCalendar();
+        Date date = new Date(startDate);
+        calendar.setTime(date);
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        date.setDate(dayOfWeek);
+        return date.getTime();
+    }
 
     public static class LocationEntry implements BaseColumns {
         //Constants for Content Provider
@@ -66,10 +80,10 @@ public class WeatherContract {
 
         }
 
-      /*  public static Uri weatherWithLocationAndDateUri(String locationSetting, long date){
+        public static Uri weatherWithLocationAndDateUri(String locationSetting, long date) {
             return CONTENT_URI.buildUpon().appendPath(locationSetting).appendPath(Long.toString(normalizeDate(date))).build();
 
-        }*/
+        }
 
         public static String getLocationFromUri(Uri uri) {
             return uri.getPathSegments().get(1);
@@ -87,6 +101,5 @@ public class WeatherContract {
                 return 0;
         }
     }
-
 }
 
