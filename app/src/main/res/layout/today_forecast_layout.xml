@@ -4,11 +4,11 @@
     android:layout_height="wrap_content">
 
     <TextView
+        android:id="@+id/date_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:paddingLeft="16dp"
-        android:text="Today" />
+        android:paddingLeft="16dp" />
 
     <include
         android:id="@+id/today_forecast_main"

@@ -14,7 +14,7 @@
         android:text="Monday" />
 
     <ImageView
-        android:id="@id/forecast_image_view"
+        android:id="@+id/forecast_image_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:src="@drawable/art_clear" />
@@ -27,7 +27,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@id/description_text_view"
+            android:id="@+id/description_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
@@ -43,7 +43,7 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@id/high_temp_text_view"
+                android:id="@+id/high_temp_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -52,7 +52,7 @@
                 android:text="18" />
 
             <TextView
-                android:id="@id/low_temp_text_view"
+                android:id="@+id/low_temp_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

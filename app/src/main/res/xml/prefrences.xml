@@ -11,7 +11,7 @@
         android:entries="@array/tempUnitOptions"
         android:entryValues="@array/tempUnitEntryValues"
         android:key="@string/pref_unit_key"
-        android:title="@string/pref_unit_title"></ListPreference>
+        android:title="@string/pref_unit_title" />
 
 
 </PreferenceScreen>
