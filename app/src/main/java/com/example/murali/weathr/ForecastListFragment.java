@@ -11,10 +11,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -67,10 +65,10 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_forecast_list, container, false);
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Weathr");
-        setHasOptionsMenu(true);
+//        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+//        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+//        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Weathr");
+//        setHasOptionsMenu(true);
         locationQuery = WeatherUtility.getPreferredLocation(getActivity());
 
 

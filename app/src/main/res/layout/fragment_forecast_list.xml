@@ -1,44 +1,7 @@
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<android.support.v7.widget.RecyclerView xmlns:app="http://schemas.android.com/apk/res/android"
+    app:id="@+id/forecastRecyclerView"
+    app:layout_width="match_parent"
+    app:layout_height="wrap_content"
+    app:scrollbars="vertical">
 
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <android.support.design.widget.CollapsingToolbarLayout
-            android:id="@+id/collapsing_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:contentScrim="@color/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
-
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:elevation="6dp"
-                app:layout_collapseMode="pin"
-                app:layout_scrollFlags="scroll|enterAlways">
-            </android.support.v7.widget.Toolbar>
-
-
-
-        </android.support.design.widget.CollapsingToolbarLayout>
-
-
-    </android.support.design.widget.AppBarLayout>
-
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/forecastRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="vertical"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-    </android.support.v7.widget.RecyclerView>
-
-
-</android.support.design.widget.CoordinatorLayout>
+</android.support.v7.widget.RecyclerView>

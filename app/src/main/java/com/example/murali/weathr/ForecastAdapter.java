@@ -14,8 +14,7 @@ import android.widget.TextView;
  * Created by Murali on 18/12/2015.
  */
 class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
-    private static final int VIEW_TYPE_TODAY = 0;
-    private static final int VIEW_TYPE_FUTURE_DAY = 1;
+
     Context context;
     Cursor cursor;
     private boolean mUseTodayLayout = true;
@@ -29,16 +28,8 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
     public ForecastAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (parent instanceof RecyclerView) {
             int layoutId = -1;
-            switch (viewType) {
-                case VIEW_TYPE_TODAY: {
-                    layoutId = R.layout.today_forecast_layout;
-                    break;
-                }
-                case VIEW_TYPE_FUTURE_DAY: {
-                    layoutId = R.layout.single_forecat_row;
-                    break;
-                }
-            }
+
+            layoutId = R.layout.single_forecat_row;
             View view = LayoutInflater.from(parent.getContext()).inflate(layoutId, parent, false);
             view.setFocusable(true);
             return new ViewHolder(view);
@@ -49,20 +40,14 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(ForecastAdapter.ViewHolder holder, int position) {
-        cursor.moveToPosition(position);
+
+        cursor.moveToPosition(position + 1);
         int weatherId = cursor.getInt(ForecastListFragment.COL_WEATHER_CONDITION_ID);
         Log.i("tag", " " + weatherId);
         int defaultImage;
 
-        switch (getItemViewType(position)) {
-            case VIEW_TYPE_TODAY:
-                defaultImage = WeatherUtility.getArtResourceForWeatherCondition(weatherId);
-                useLongToday = true;
-                break;
-            default:
-                defaultImage = WeatherUtility.getIconResourceForWeatherCondition(weatherId);
-                useLongToday = false;
-        }
+        defaultImage = WeatherUtility.getArtResourceForWeatherCondition(weatherId);
+        useLongToday = true;
 
         holder.forecastImageView.setImageResource(defaultImage);
 
@@ -98,10 +83,6 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
         return cursor.getCount();
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        return (position == 0 && mUseTodayLayout) ? VIEW_TYPE_TODAY : VIEW_TYPE_FUTURE_DAY;
-    }
 
     public Cursor getCursor() {
         return cursor;

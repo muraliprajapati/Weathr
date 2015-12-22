@@ -26,7 +26,7 @@
 
         <provider
             android:name=".database.WeatherProvider"
-            android:authorities="com.example.murali.weathr"></provider>
+            android:authorities="com.example.murali.weathr" />
     </application>
 
 </manifest>
