@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Vector;
 
@@ -28,6 +29,7 @@ import java.util.Vector;
  * Created by Murali on 08-07-2015.
  */
 public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
+
     public static final String TAG = "FetchWeatherTask";
     public static final String API_URL_BASE = "http://api.openweathermap.org/data/2.5/forecast/daily?";
     //"http://api.openweathermap.org/data/2.5/forecast/daily?q=395010&units=metric&cnt=7
@@ -99,6 +101,12 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
 
     private void parseJsonData(String jsonString, String locationSetting) throws JSONException {
 
+        Calendar calendar = new GregorianCalendar();
+        Date date = new Date();
+        calendar.setTime(date);
+        int today = calendar.get(Calendar.DAY_OF_WEEK);
+
+
         JSONObject cityWeather = new JSONObject(jsonString);
         JSONArray weekForecaast = cityWeather.getJSONArray("list");
 
@@ -142,6 +150,14 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
             weatherValues.put(WeatherContract.WeatherEntry.SHORT_DESCRIPTION, description);
             weatherValues.put(WeatherContract.WeatherEntry.WEATHER_ID, weatherId);
 
+
+            // add to database
+//            if ( cVVector.size() > 0 ) {
+//                ContentValues[] cvArray = new ContentValues[cVVector.size()];
+//                cVVector.toArray(cvArray);
+//               // getContext().getContentResolver().delete(WeatherContract.WeatherEntry.CONTENT_URI,null, null);
+//                getContext().getContentResolver().bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI, cvArray);
+//            }
             getContext().getContentResolver().insert(WeatherContract.WeatherEntry.CONTENT_URI, weatherValues);
 
 
@@ -183,8 +199,6 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
 
         locationValues.put(WeatherContract.LocationEntry.COORD_LAT, lat);
         locationValues.put(WeatherContract.LocationEntry.COORD_LONG, lon);
-
-        Log.i("tag", cityName + locationSetting + "" + lat + "" + lon);
 
         // Finally, insert location data into the database.
         Uri insertedUri = getContext().getContentResolver().insert(

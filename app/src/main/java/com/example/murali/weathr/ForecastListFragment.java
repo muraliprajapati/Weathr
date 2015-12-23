@@ -3,20 +3,14 @@ package com.example.murali.weathr;
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
-import android.content.Intent;
 import android.content.Loader;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -38,7 +32,7 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
     static final int COL_COORD_LONG = 9;
 
 
-    private static final int LIST_FRAGMENT_LOADER = 0;
+    private static final int LIST_FRAGMENT_LOADER = 1;
 
     private static final String[] FORECAST_COLUMNS = {
 
@@ -81,56 +75,32 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_main, menu);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(LIST_FRAGMENT_LOADER, null, this);
+
     }
+
+
+
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            Intent intent = new Intent(getActivity(), SettingsActivity.class);
-            startActivity(intent);
-            return true;
+    public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+        if (id == LIST_FRAGMENT_LOADER) {
+            String locationString = WeatherUtility.getPreferredLocation(getActivity());
+            String sortOrder = WeatherContract.WeatherEntry.DATE + " ASC";
+            Uri weatherForLocationUri = WeatherContract.WeatherEntry.weatherWithLocationUri(locationString);
+            return new CursorLoader(getActivity(), weatherForLocationUri, FORECAST_COLUMNS, null, null, sortOrder);
         }
-        if (id == R.id.action_refresh) {
-            updateWeather();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    public void updateWeather() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String location = sharedPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default_value));
-        FetchWeatherTask task = new FetchWeatherTask(getActivity());
-        task.execute(location);
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        String locationString = WeatherUtility.getPreferredLocation(getActivity());
-        String sortOrder = WeatherContract.WeatherEntry.DATE + " ASC";
-        Uri weatherForLocationUri = WeatherContract.WeatherEntry.weatherWithLocationUri(locationString);
-        return new CursorLoader(getActivity(), weatherForLocationUri, FORECAST_COLUMNS, null, null, sortOrder);
+        return null;
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        mAdapter.swapCursor(cursor);
+        if (loader.getId() == LIST_FRAGMENT_LOADER) {
+            mAdapter.swapCursor(cursor);
+
+        }
     }
 
     @Override

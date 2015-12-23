@@ -3,7 +3,6 @@ package com.example.murali.weathr.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.widget.Toast;
 
 import com.example.murali.weathr.database.WeatherContract.LocationEntry;
 import com.example.murali.weathr.database.WeatherContract.WeatherEntry;
@@ -34,7 +33,7 @@ public class WeatherDatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(location_table);
         sqLiteDatabase.execSQL(weather_table);
-        Toast.makeText(context, "Tables Created Successfully", Toast.LENGTH_LONG).show();
+        //Toast.makeText(context, "Tables Created Successfully", Toast.LENGTH_LONG).show();
 
     }
 

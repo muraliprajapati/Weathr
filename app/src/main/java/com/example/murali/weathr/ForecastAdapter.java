@@ -18,7 +18,7 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
     Context context;
     Cursor cursor;
     private boolean mUseTodayLayout = true;
-    private boolean useLongToday = true;
+    private boolean useLongToday = false;
 
     public ForecastAdapter(Context context) {
         this.context = context;
@@ -27,9 +27,7 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
     @Override
     public ForecastAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (parent instanceof RecyclerView) {
-            int layoutId = -1;
-
-            layoutId = R.layout.single_forecat_row;
+            int layoutId = R.layout.single_forecat_row;
             View view = LayoutInflater.from(parent.getContext()).inflate(layoutId, parent, false);
             view.setFocusable(true);
             return new ViewHolder(view);
@@ -42,12 +40,13 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
     public void onBindViewHolder(ForecastAdapter.ViewHolder holder, int position) {
 
         cursor.moveToPosition(position + 1);
+
         int weatherId = cursor.getInt(ForecastListFragment.COL_WEATHER_CONDITION_ID);
         Log.i("tag", " " + weatherId);
         int defaultImage;
 
         defaultImage = WeatherUtility.getArtResourceForWeatherCondition(weatherId);
-        useLongToday = true;
+        useLongToday = false;
 
         holder.forecastImageView.setImageResource(defaultImage);
 
@@ -80,7 +79,7 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
     @Override
     public int getItemCount() {
         if (cursor == null) return 0;
-        return cursor.getCount();
+        return cursor.getCount() - 1;
     }
 
 
@@ -90,6 +89,7 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
 
     public void swapCursor(Cursor cursor) {
         this.cursor = cursor;
+
         notifyDataSetChanged();
     }
 
