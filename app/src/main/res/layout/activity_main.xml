@@ -9,14 +9,16 @@
         android:id="@+id/today_forecast_fragment"
         android:name="com.example.murali.weathr.TodayForecastFragment"
         android:layout_width="match_parent"
-        android:layout_height="348dp"
+        android:layout_height="0dp"
+        android:layout_weight="1.8"
         tools:layout="@layout/today_forecast_layout" />
 
     <fragment
         android:id="@+id/future_forecast_fragment"
         android:name="com.example.murali.weathr.ForecastListFragment"
         android:layout_width="match_parent"
-        android:layout_height="216dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         tools:layout="@layout/fragment_forecast_list" />
 </LinearLayout>
 
