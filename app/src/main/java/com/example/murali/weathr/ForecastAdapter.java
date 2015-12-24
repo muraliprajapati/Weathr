@@ -3,7 +3,6 @@ package com.example.murali.weathr;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,7 +41,7 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
         cursor.moveToPosition(position + 1);
 
         int weatherId = cursor.getInt(ForecastListFragment.COL_WEATHER_CONDITION_ID);
-        Log.i("tag", " " + weatherId);
+        //Log.i("tag", " " + weatherId);
         int defaultImage;
 
         defaultImage = WeatherUtility.getArtResourceForWeatherCondition(weatherId);
@@ -55,7 +54,7 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
         holder.dateTextView.setText(dateString);
 
         String descriptionText = WeatherUtility.getStringForWeatherCondition(context, weatherId);
-        Log.i("tag", dateString);
+        //Log.i("tag", dateString);
         holder.descriptionTextView.setText(descriptionText);
 
         double high = cursor.getDouble(ForecastListFragment.COL_WEATHER_MAX_TEMP);
@@ -67,7 +66,7 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
         holder.lowTempTextView.setText(lowString);
 
         String cityName = cursor.getString(ForecastListFragment.COL_CITY_NAME);
-        Log.i("tag", cityName);
+        //Log.i("tag", cityName);
         //holder.locationTextView.setText(cityName);
 
     }

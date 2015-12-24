@@ -21,7 +21,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Vector;
 
@@ -85,8 +84,6 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
         super.onPostExecute(result);
 
 
-
-
     }
 
     private String readJSON(InputStream inputStream) throws IOException {
@@ -100,11 +97,12 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
     }
 
     private void parseJsonData(String jsonString, String locationSetting) throws JSONException {
-
         Calendar calendar = new GregorianCalendar();
-        Date date = new Date();
-        calendar.setTime(date);
-        int today = calendar.get(Calendar.DAY_OF_WEEK);
+        long todayInMillis = calendar.getTimeInMillis();
+        calendar.clear();
+        int pastDay = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+        calendar.set(Calendar.DAY_OF_WEEK, pastDay);
+        long pastDayInMillis = calendar.getTimeInMillis();
 
 
         JSONObject cityWeather = new JSONObject(jsonString);
@@ -120,52 +118,65 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
         long locationId = addLocation(locationSetting, cityName, cityLatitude, cityLongitude);
         Vector<ContentValues> cVVector = new Vector<ContentValues>(weekForecaast.length());
 
-        for (int i = 0; i < 7; i++) {
-            cityWeather = new JSONObject(jsonString);
-            weekForecaast = cityWeather.getJSONArray("list");
-            JSONObject dayForecast = weekForecaast.getJSONObject(i);
-            JSONObject mainForecast = dayForecast.getJSONObject("temp");
-            Double minTemp = mainForecast.getDouble("min");
-            Double maxTemp = mainForecast.getDouble("max");
-            Double pressure = dayForecast.getDouble("pressure");
-            int humidity = dayForecast.getInt("humidity");
-            Double windSpeed = dayForecast.getDouble("speed");
-            Double windDirection = dayForecast.getDouble("deg");
-            long dayTime = getDay(i);
+        String sortOrder = WeatherContract.WeatherEntry.DATE + " ASC";
+        String locationString = WeatherUtility.getPreferredLocation(getContext());
+        Uri uri = WeatherContract.WeatherEntry.CONTENT_URI;
+        String selection = WeatherContract.WeatherEntry.DATE + " >= ?";
+        String[] selectionArgs = new String[]{Long.toString(todayInMillis)};
+        String[] projection = new String[]{WeatherContract.WeatherEntry.DATE};
+        Cursor cursor = getContext().getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
 
-            JSONObject weatherObject = dayForecast.getJSONArray("weather").getJSONObject(0);
-            String description = weatherObject.getString("main");
-            int weatherId = weatherObject.getInt("id");
+        if (cursor.moveToFirst() && cursor.getCount() <= 7) {
+            Log.i("tag", "FetchWeatehrTask Cursor " + cursor.getCount() + " rows");
+            getContext().getContentResolver().delete(WeatherContract.WeatherEntry.CONTENT_URI,
+                    WeatherContract.WeatherEntry.DATE + " < ?",
+                    new String[]{Long.toString(pastDayInMillis)});
+            cursor.close();
 
-            ContentValues weatherValues = new ContentValues();
+        } else {
+            for (int i = 0; i < 7; i++) {
+                cityWeather = new JSONObject(jsonString);
+                weekForecaast = cityWeather.getJSONArray("list");
+                JSONObject dayForecast = weekForecaast.getJSONObject(i);
+                JSONObject mainForecast = dayForecast.getJSONObject("temp");
+                Double minTemp = mainForecast.getDouble("min");
+                Double maxTemp = mainForecast.getDouble("max");
+                Double pressure = dayForecast.getDouble("pressure");
+                int humidity = dayForecast.getInt("humidity");
+                Double windSpeed = dayForecast.getDouble("speed");
+                Double windDirection = dayForecast.getDouble("deg");
+                long dayTime = getDayTimeInMillis(i);
 
-            weatherValues.put(WeatherContract.WeatherEntry.LOCATION_ID, locationId);
-            weatherValues.put(WeatherContract.WeatherEntry.DATE, dayTime);
-            weatherValues.put(WeatherContract.WeatherEntry.HUMIDITY, humidity);
-            weatherValues.put(WeatherContract.WeatherEntry.PRESSURE, pressure);
-            weatherValues.put(WeatherContract.WeatherEntry.WIND_SPEED, windSpeed);
-            weatherValues.put(WeatherContract.WeatherEntry.DEGREES, windDirection);
-            weatherValues.put(WeatherContract.WeatherEntry.MAX_TEMP, maxTemp);
-            weatherValues.put(WeatherContract.WeatherEntry.MIN_TEMP, minTemp);
-            weatherValues.put(WeatherContract.WeatherEntry.SHORT_DESCRIPTION, description);
-            weatherValues.put(WeatherContract.WeatherEntry.WEATHER_ID, weatherId);
-
-
-            // add to database
-//            if ( cVVector.size() > 0 ) {
-//                ContentValues[] cvArray = new ContentValues[cVVector.size()];
-//                cVVector.toArray(cvArray);
-//               // getContext().getContentResolver().delete(WeatherContract.WeatherEntry.CONTENT_URI,null, null);
-//                getContext().getContentResolver().bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI, cvArray);
-//            }
-            getContext().getContentResolver().insert(WeatherContract.WeatherEntry.CONTENT_URI, weatherValues);
+                JSONObject weatherObject = dayForecast.getJSONArray("weather").getJSONObject(0);
+                String description = weatherObject.getString("main");
+                int weatherId = weatherObject.getInt("id");
 
 
+                ContentValues weatherValues = new ContentValues();
+
+                weatherValues.put(WeatherContract.WeatherEntry.LOCATION_ID, locationId);
+                weatherValues.put(WeatherContract.WeatherEntry.DATE, dayTime);
+                weatherValues.put(WeatherContract.WeatherEntry.HUMIDITY, humidity);
+                weatherValues.put(WeatherContract.WeatherEntry.PRESSURE, pressure);
+                weatherValues.put(WeatherContract.WeatherEntry.WIND_SPEED, windSpeed);
+                weatherValues.put(WeatherContract.WeatherEntry.DEGREES, windDirection);
+                weatherValues.put(WeatherContract.WeatherEntry.MAX_TEMP, maxTemp);
+                weatherValues.put(WeatherContract.WeatherEntry.MIN_TEMP, minTemp);
+                weatherValues.put(WeatherContract.WeatherEntry.SHORT_DESCRIPTION, description);
+                weatherValues.put(WeatherContract.WeatherEntry.WEATHER_ID, weatherId);
+
+                getContext().getContentResolver().insert(WeatherContract.WeatherEntry.CONTENT_URI, weatherValues);
+                getContext().getContentResolver().delete(WeatherContract.WeatherEntry.CONTENT_URI,
+                        WeatherContract.WeatherEntry.DATE + " < ?",
+                        new String[]{Long.toString(todayInMillis)});
+
+
+            }
         }
 
     }
 
-    public long getDay(int i) {
+    public long getDayTimeInMillis(int i) {
         Calendar calendar = new GregorianCalendar();
         calendar.add(Calendar.DAY_OF_MONTH, i);
         return calendar.getTimeInMillis();
@@ -186,31 +197,31 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
         if (locationCursor.moveToFirst()) {
             int locationIdIndex = locationCursor.getColumnIndex(WeatherContract.LocationEntry._ID);
             locationId = locationCursor.getLong(locationIdIndex);
+        } else {
+
+            // Now that the content provider is set up, inserting rows of data is pretty simple.
+            // First create a ContentValues object to hold the data you want to insert.
+            ContentValues locationValues = new ContentValues();
+
+            // Then add the data, along with the corresponding name of the data type,
+            // so the content provider knows what kind of value is being inserted.
+            locationValues.put(WeatherContract.LocationEntry.LOCATION_CODE, locationSetting);
+            locationValues.put(WeatherContract.LocationEntry.CITY_NAME, cityName);
+
+            locationValues.put(WeatherContract.LocationEntry.COORD_LAT, lat);
+            locationValues.put(WeatherContract.LocationEntry.COORD_LONG, lon);
+
+            // Finally, insert location data into the database.
+            Uri insertedUri = getContext().getContentResolver().insert(
+                    WeatherContract.LocationEntry.CONTENT_URI,
+                    locationValues
+            );
+
+            // The resulting URI contains the ID for the row.  Extract the locationId from the Uri.
+            locationId = ContentUris.parseId(insertedUri);
+
         }
-
-        // Now that the content provider is set up, inserting rows of data is pretty simple.
-        // First create a ContentValues object to hold the data you want to insert.
-        ContentValues locationValues = new ContentValues();
-
-        // Then add the data, along with the corresponding name of the data type,
-        // so the content provider knows what kind of value is being inserted.
-        locationValues.put(WeatherContract.LocationEntry.LOCATION_CODE, locationSetting);
-        locationValues.put(WeatherContract.LocationEntry.CITY_NAME, cityName);
-
-        locationValues.put(WeatherContract.LocationEntry.COORD_LAT, lat);
-        locationValues.put(WeatherContract.LocationEntry.COORD_LONG, lon);
-
-        // Finally, insert location data into the database.
-        Uri insertedUri = getContext().getContentResolver().insert(
-                WeatherContract.LocationEntry.CONTENT_URI,
-                locationValues
-        );
-
-        // The resulting URI contains the ID for the row.  Extract the locationId from the Uri.
-        locationId = ContentUris.parseId(insertedUri);
-
-
-//        locationCursor.close();
+        locationCursor.close();
         return locationId;
     }
 

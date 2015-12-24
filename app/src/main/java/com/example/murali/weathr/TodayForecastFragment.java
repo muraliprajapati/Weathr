@@ -109,7 +109,7 @@ public class TodayForecastFragment extends Fragment implements LoaderManager.Loa
         if (cursor != null && cursor.getCount() > 0) {
             cursor.moveToFirst();
             int weatherId = cursor.getInt(ForecastListFragment.COL_WEATHER_CONDITION_ID);
-            Log.i("tag", " " + weatherId);
+            // Log.i("tag", " " + weatherId);
             int defaultImage;
 
 
@@ -136,7 +136,7 @@ public class TodayForecastFragment extends Fragment implements LoaderManager.Loa
             lowTempTextView.setText(lowString);
 
             String cityName = cursor.getString(ForecastListFragment.COL_CITY_NAME);
-            Log.i("tag", cityName);
+            //Log.i("tag", cityName);
             locationTextView.setText(cityName);
         } else {
             Toast.makeText(getActivity(), "Bad Luck!", Toast.LENGTH_SHORT).show();
@@ -149,5 +149,8 @@ public class TodayForecastFragment extends Fragment implements LoaderManager.Loa
         getLoaderManager().restartLoader(TODAY_FRAGMENT_LOADER, null, this);
     }
 
-
+    void restart() {
+        Log.i("tag", "loader restarted");
+        getLoaderManager().restartLoader(TODAY_FRAGMENT_LOADER, null, this);
+    }
 }

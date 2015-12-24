@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 /**
  * Created by Murali on 17/10/2015.
@@ -212,7 +213,7 @@ public class WeatherProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-
+        Log.i("tag", "Deleted " + noOfRowsDeleted + " rows");
         if (noOfRowsDeleted != 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }

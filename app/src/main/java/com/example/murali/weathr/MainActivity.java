@@ -10,14 +10,17 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
     private static final int FRAGMENT_LOADER = 0;
+    TodayForecastFragment fragment;
+    ForecastListFragment listFragment;
+    FetchWeatherTask task = new FetchWeatherTask(this);
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
+        fragment = (TodayForecastFragment) getFragmentManager().findFragmentById(R.id.today_forecast_fragment);
+        listFragment = (ForecastListFragment) getFragmentManager().findFragmentById(R.id.future_forecast_fragment);
     }
 
     @Override
@@ -59,13 +62,18 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     public void updateWeather() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String location = sharedPreferences.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default_value));
-        FetchWeatherTask task = new FetchWeatherTask(this);
         task.execute(location);
+        restartAllLoaders();
     }
 
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         updateWeather();
+    }
+
+    void restartAllLoaders() {
+        fragment.restart();
+        listFragment.restart();
     }
 }
