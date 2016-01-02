@@ -47,9 +47,11 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Override
     public void onResume() {
+        super.onResume();
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         sp.registerOnSharedPreferenceChangeListener(this);
-        super.onResume();
+        updateWeather();
+
     }
 
     @Override

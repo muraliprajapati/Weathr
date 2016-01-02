@@ -20,6 +20,11 @@ public class WeatherProvider extends ContentProvider {
     public static final int LOCATION = 300;                                //DIR
 
     public static final SQLiteQueryBuilder weatherWithLocationQueryBuilder;
+    //location.location_setting = ? AND date >= ?
+    private static final String locationSettingWithStartDateSelection =
+            WeatherContract.LocationEntry.TABLE_NAME +
+                    "." + WeatherContract.LocationEntry.LOCATION_CODE + " = ? AND " +
+                    WeatherContract.WeatherEntry.DATE + " >= ? ";
 
     static {
 
@@ -44,22 +49,19 @@ public class WeatherProvider extends ContentProvider {
 
 
     /*
+    *   To get weather data for specified location in SharedPreferences and date we need Selection statement
+    *   SQLite selection statement: location.location_setting = ? AND date = ?
+    *   Here the ? will be replaced by SelectionArgs in query method.
+
+     */
+    /*
     *   To get weather data for specified location in SharedPreferences we need Selection statement
     *   SQLite selection statement: location.location_code = ?
     *   Here the ? will be replaced by SelectionArgs in query method.
 
      */
     String locationSelection = WeatherContract.LocationEntry.TABLE_NAME + "." + WeatherContract.LocationEntry.LOCATION_CODE + " = ?";
-
-
-        /*
-        *   To get weather data for specified location in SharedPreferences and date we need Selection statement
-        *   SQLite selection statement: location.location_setting = ? AND date = ?
-        *   Here the ? will be replaced by SelectionArgs in query method.
-
-         */
-
-    String locationAndDateSelection = WeatherContract.LocationEntry.TABLE_NAME + "." + WeatherContract.LocationEntry.LOCATION_CODE + " = ? AND " + WeatherContract.WeatherEntry.DATE + " = ?";
+    String locationAndDateSelection = WeatherContract.LocationEntry.TABLE_NAME + "." + WeatherContract.LocationEntry.LOCATION_CODE + " = ? AND " + WeatherContract.WeatherEntry.DATE + " = ? ";
 
     public static UriMatcher buildUriMatcher() {
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -74,10 +76,18 @@ public class WeatherProvider extends ContentProvider {
     }
 
     private Cursor getWeatherWithLocation(Uri uri, String[] projection, String sortOrder) {
+        String selection;
+        String[] selectionArgs;
         String location = WeatherContract.WeatherEntry.getLocationFromUri(uri);
+        long date = WeatherContract.WeatherEntry.getStartDateFromUri(uri);
 
-        String selection = locationSelection;
-        String[] selectionArgs = {location};
+        if (date == 0) {
+            selection = locationSelection;
+            selectionArgs = new String[]{location};
+        } else {
+            selectionArgs = new String[]{location, Long.toString(date)};
+            selection = locationSettingWithStartDateSelection;
+        }
         return weatherWithLocationQueryBuilder.query(dbHelper.getReadableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
 
     }
@@ -86,7 +96,7 @@ public class WeatherProvider extends ContentProvider {
         String location = WeatherContract.WeatherEntry.getLocationFromUri(uri);
         long date = WeatherContract.WeatherEntry.getDateFromUri(uri);
 
-        String selection = locationSelection;
+        String selection = locationAndDateSelection;
         String[] selectionArgs = {location, Long.toString(date)};
         return weatherWithLocationQueryBuilder.query(dbHelper.getReadableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
 
@@ -236,7 +246,7 @@ public class WeatherProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-
+        Log.i("tag", "Updated " + noOfRowsUpdated + " rows");
         if (noOfRowsUpdated != 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }

@@ -22,7 +22,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.Vector;
 
 /**
  * Created by Murali on 08-07-2015.
@@ -39,13 +38,20 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
     public static final String API_DAY_COUNT = "7";
     public static final String APP_ID = "789c7a808690dc32dbf1324ad4b2e1e3";
 
+    long time;
+
     Context context;
+
+
+    long[] weatherRowId = new long[7];
+
     //    String locationQuery = WeatherUtility.getPreferredLocation(context);
     String locationQuery = "395010";
 
     FetchWeatherTask(Context context) {
         this.context = context;
     }
+
 
     @Override
     protected Void doInBackground(String... location) {
@@ -71,9 +77,11 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
 
             parseJsonData(jsonString, locationQuery);
 
+
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         } finally {
+            assert connection != null;
             connection.disconnect();
         }
         return null;
@@ -82,8 +90,6 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
     @Override
     protected void onPostExecute(Void result) {
         super.onPostExecute(result);
-
-
     }
 
     private String readJSON(InputStream inputStream) throws IOException {
@@ -96,17 +102,76 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
         return builder.toString();
     }
 
-    private void parseJsonData(String jsonString, String locationSetting) throws JSONException {
-        Calendar calendar = new GregorianCalendar();
-        long todayInMillis = calendar.getTimeInMillis();
-        calendar.clear();
-        int pastDay = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-        calendar.set(Calendar.DAY_OF_WEEK, pastDay);
-        long pastDayInMillis = calendar.getTimeInMillis();
 
+    private void insertOrUpdate(int i, ContentValues contentValues) {
+        Log.i("tag", "In insertOrUpdate");
+        if (isInWeatherDatabase(getDayForIndex(i), i)) {
+            Log.i("tag", "In if true");
+            String selection = WeatherContract.WeatherEntry.DATE + " = ?";
+            long _id = weatherRowId[i];
+            String[] selectionArgs = new String[]{Long.toString(_id)};
+            getContext().getContentResolver().update(WeatherContract.WeatherEntry.CONTENT_URI, contentValues, selection, selectionArgs);
+        } else {
+            Log.i("tag", "In if false");
+            getContext().getContentResolver().insert(WeatherContract.WeatherEntry.CONTENT_URI, contentValues);
+        }
+
+        getContext().getContentResolver().delete(WeatherContract.WeatherEntry.CONTENT_URI,
+                WeatherContract.WeatherEntry.DATE + " < ?",
+                new String[]{Long.toString(getTime())});
+    }
+
+    private boolean isInWeatherDatabase(int givenDay, int index) {
+        Log.i("tag", "In isInWeatherDatabase");
+        boolean result = false;
+        String sortOrder = WeatherContract.WeatherEntry.DATE + " ASC";
+        Uri uri = WeatherContract.WeatherEntry.CONTENT_URI;
+        String selection = WeatherContract.WeatherEntry.DATE + " >= ?";
+        String[] selectionArgs = new String[]{Long.toString(getTime())};
+        String[] projection = new String[]{WeatherContract.WeatherEntry.DATE};
+        Cursor cursor = getContext().getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
+        Log.i("tag", "FetchWeatherTask Cursor " + cursor.getCount() + " rows");
+        while (cursor.moveToNext()) {
+            Log.i("tag", "in While loop");
+            int weathrDateIndex = cursor.getColumnIndex(WeatherContract.WeatherEntry.DATE);
+            long date = cursor.getLong(weathrDateIndex);
+            int day = getDayForMillis(date);
+            Log.i("tag", "From database " + day + ": " + givenDay + " From calendar");
+            if (day == givenDay) {
+                Log.i("tag", "in IF condition");
+                String newSelection = WeatherContract.WeatherEntry.DATE + " = ?";
+                String[] newSelectionArgs = new String[]{Long.toString(date)};
+                Cursor newCursor = getContext().getContentResolver().query(uri, null, newSelection, newSelectionArgs, null);
+                if (newCursor != null) {
+                    newCursor.moveToFirst();
+                }
+                int weatherIdIndex = 0;
+                weatherIdIndex = newCursor.getColumnIndex("_id");
+                weatherRowId[index] = newCursor.getLong(weatherIdIndex);
+
+                result = true;
+            }
+        }
+        Log.i("tag", "outside While loop with " + result);
+        cursor.close();
+        return result;
+    }
+
+    private void parseJsonData(String jsonString, String locationSetting) throws JSONException {
+
+//        long todayInMillis = calendar.getTimeInMillis();
+//        calendar.clear();
+//        int pastDay = calendar.get(Calendar.DAY_OF_MONTH) - 1;
+//        calendar.set(Calendar.DAY_OF_MONTH, pastDay);
+//        long pastDayInMillis = calendar.getTimeInMillis();
+
+
+        ContentValues weatherValues = new ContentValues();
+
+        JSONArray weekForecast;
 
         JSONObject cityWeather = new JSONObject(jsonString);
-        JSONArray weekForecaast = cityWeather.getJSONArray("list");
+
 
         JSONObject cityJson = cityWeather.getJSONObject("city");
         String cityName = cityJson.getString("name");
@@ -116,70 +181,61 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
         double cityLongitude = cityCoord.getDouble("lon");
 
         long locationId = addLocation(locationSetting, cityName, cityLatitude, cityLongitude);
-        Vector<ContentValues> cVVector = new Vector<ContentValues>(weekForecaast.length());
-
-        String sortOrder = WeatherContract.WeatherEntry.DATE + " ASC";
-        String locationString = WeatherUtility.getPreferredLocation(getContext());
-        Uri uri = WeatherContract.WeatherEntry.CONTENT_URI;
-        String selection = WeatherContract.WeatherEntry.DATE + " >= ?";
-        String[] selectionArgs = new String[]{Long.toString(todayInMillis)};
-        String[] projection = new String[]{WeatherContract.WeatherEntry.DATE};
-        Cursor cursor = getContext().getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
-
-        if (cursor.moveToFirst() && cursor.getCount() <= 7) {
-            Log.i("tag", "FetchWeatehrTask Cursor " + cursor.getCount() + " rows");
-            getContext().getContentResolver().delete(WeatherContract.WeatherEntry.CONTENT_URI,
-                    WeatherContract.WeatherEntry.DATE + " < ?",
-                    new String[]{Long.toString(pastDayInMillis)});
-            cursor.close();
-
-        } else {
-            for (int i = 0; i < 7; i++) {
-                cityWeather = new JSONObject(jsonString);
-                weekForecaast = cityWeather.getJSONArray("list");
-                JSONObject dayForecast = weekForecaast.getJSONObject(i);
-                JSONObject mainForecast = dayForecast.getJSONObject("temp");
-                Double minTemp = mainForecast.getDouble("min");
-                Double maxTemp = mainForecast.getDouble("max");
-                Double pressure = dayForecast.getDouble("pressure");
-                int humidity = dayForecast.getInt("humidity");
-                Double windSpeed = dayForecast.getDouble("speed");
-                Double windDirection = dayForecast.getDouble("deg");
-                long dayTime = getDayTimeInMillis(i);
-
-                JSONObject weatherObject = dayForecast.getJSONArray("weather").getJSONObject(0);
-                String description = weatherObject.getString("main");
-                int weatherId = weatherObject.getInt("id");
 
 
-                ContentValues weatherValues = new ContentValues();
+        for (int i = 0; i < 7; i++) {
+            cityWeather = new JSONObject(jsonString);
+            weekForecast = cityWeather.getJSONArray("list");
+            JSONObject dayForecast = weekForecast.getJSONObject(i);
+            JSONObject mainForecast = dayForecast.getJSONObject("temp");
+            Double minTemp = mainForecast.getDouble("min");
+            Double maxTemp = mainForecast.getDouble("max");
+            Double pressure = dayForecast.getDouble("pressure");
+            int humidity = dayForecast.getInt("humidity");
+            Double windSpeed = dayForecast.getDouble("speed");
+            Double windDirection = dayForecast.getDouble("deg");
+            long dayTime = getDayTimeInMillis(i);
 
-                weatherValues.put(WeatherContract.WeatherEntry.LOCATION_ID, locationId);
-                weatherValues.put(WeatherContract.WeatherEntry.DATE, dayTime);
-                weatherValues.put(WeatherContract.WeatherEntry.HUMIDITY, humidity);
-                weatherValues.put(WeatherContract.WeatherEntry.PRESSURE, pressure);
-                weatherValues.put(WeatherContract.WeatherEntry.WIND_SPEED, windSpeed);
-                weatherValues.put(WeatherContract.WeatherEntry.DEGREES, windDirection);
-                weatherValues.put(WeatherContract.WeatherEntry.MAX_TEMP, maxTemp);
-                weatherValues.put(WeatherContract.WeatherEntry.MIN_TEMP, minTemp);
-                weatherValues.put(WeatherContract.WeatherEntry.SHORT_DESCRIPTION, description);
-                weatherValues.put(WeatherContract.WeatherEntry.WEATHER_ID, weatherId);
-
-                getContext().getContentResolver().insert(WeatherContract.WeatherEntry.CONTENT_URI, weatherValues);
-                getContext().getContentResolver().delete(WeatherContract.WeatherEntry.CONTENT_URI,
-                        WeatherContract.WeatherEntry.DATE + " < ?",
-                        new String[]{Long.toString(todayInMillis)});
+            JSONObject weatherObject = dayForecast.getJSONArray("weather").getJSONObject(0);
+            String description = weatherObject.getString("main");
+            int weatherId = weatherObject.getInt("id");
 
 
-            }
+            weatherValues.put(WeatherContract.WeatherEntry.LOCATION_ID, locationId);
+            weatherValues.put(WeatherContract.WeatherEntry.DATE, dayTime);
+            weatherValues.put(WeatherContract.WeatherEntry.HUMIDITY, humidity);
+            weatherValues.put(WeatherContract.WeatherEntry.PRESSURE, pressure);
+            weatherValues.put(WeatherContract.WeatherEntry.WIND_SPEED, windSpeed);
+            weatherValues.put(WeatherContract.WeatherEntry.DEGREES, windDirection);
+            weatherValues.put(WeatherContract.WeatherEntry.MAX_TEMP, maxTemp);
+            weatherValues.put(WeatherContract.WeatherEntry.MIN_TEMP, minTemp);
+            weatherValues.put(WeatherContract.WeatherEntry.SHORT_DESCRIPTION, description);
+            weatherValues.put(WeatherContract.WeatherEntry.WEATHER_ID, weatherId);
+
+            insertOrUpdate(i, weatherValues);
         }
 
     }
 
+
     public long getDayTimeInMillis(int i) {
         Calendar calendar = new GregorianCalendar();
         calendar.add(Calendar.DAY_OF_MONTH, i);
+        if (i == 0) setTodayTime(calendar.getTimeInMillis());
+        //Log.i("tag", "FetchWeatherTask time for index " + i + ": " + calendar.getTimeInMillis());
         return calendar.getTimeInMillis();
+    }
+
+    public int getDayForIndex(int i) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.add(Calendar.DAY_OF_MONTH, i);
+        return calendar.get(Calendar.DAY_OF_MONTH);
+    }
+
+    public int getDayForMillis(long timeInMillis) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTimeInMillis(timeInMillis);
+        return calendar.get(Calendar.DAY_OF_MONTH);
     }
 
     long addLocation(String locationSetting, String cityName, double lat, double lon) {
@@ -190,7 +246,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
                 WeatherContract.LocationEntry.CONTENT_URI,
                 new String[]{WeatherContract.LocationEntry._ID},
                 WeatherContract.LocationEntry.LOCATION_CODE + " = ?",
-                new String[]{cityName},
+                new String[]{locationSetting},
                 null);
 
 
@@ -228,5 +284,27 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
     public Context getContext() {
         return context;
     }
+
+    public void setTodayTime(long time) {
+        this.time = time;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public long getTimeFromDatabase() {
+        String sortOrder = WeatherContract.WeatherEntry.DATE + " ASC";
+        Uri uri = WeatherContract.WeatherEntry.CONTENT_URI;
+        String selection = WeatherContract.WeatherEntry.DATE + " >= ?";
+        String[] selectionArgs = new String[]{Long.toString(getTime())};
+        String[] projection = new String[]{WeatherContract.WeatherEntry.DATE};
+        Cursor cursor = getContext().getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
+        int weathrDateIndex = cursor.getColumnIndex(WeatherContract.WeatherEntry.DATE);
+        cursor.moveToFirst();
+        long date = cursor.getLong(weathrDateIndex);
+        return date;
+    }
+
 
 }

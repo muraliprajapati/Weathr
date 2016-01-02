@@ -371,4 +371,43 @@ public class WeatherUtility {
         // For presentation, assume the user doesn't care about tenths of a degree.
         return String.format(context.getString(R.string.format_temperature), temperature);
     }
+
+    public static boolean isFirstRun(Context context) {
+
+        final String PREF_VERSION_CODE_KEY = "version_code";
+        final int DOESNT_EXIST = -1;
+        boolean firstRun = false;
+
+
+        // Get current version code
+        int currentVersionCode = 0;
+        currentVersionCode = BuildConfig.VERSION_CODE;
+
+        // Get saved version code
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        int savedVersionCode = prefs.getInt(PREF_VERSION_CODE_KEY, DOESNT_EXIST);
+
+        // Check for first run or upgrade
+        if (currentVersionCode == savedVersionCode) {
+
+            // This is just a normal run
+            firstRun = false;
+
+        } else if (savedVersionCode == DOESNT_EXIST) {
+
+            firstRun = true;
+
+        } else if (currentVersionCode > savedVersionCode) {
+
+            // TODO This is an upgrade
+            firstRun = true;
+
+        }
+
+        // Update the shared preferences with the current version code
+        prefs.edit().putInt(PREF_VERSION_CODE_KEY, currentVersionCode).commit();
+        return firstRun;
+
+
+    }
 }

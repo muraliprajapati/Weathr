@@ -53,7 +53,7 @@ public class TodayForecastFragment extends Fragment implements LoaderManager.Loa
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View itemView = inflater.inflate(R.layout.today_forecast_layout, container, false);
-        Log.i("tag", "inside onCreateView");
+        //Log.i("tag", "inside onCreateView");
         adapter = new ForecastAdapter(getActivity());
         forecastImageView = (ImageView) itemView.findViewById(R.id.forecast_image_view);
         locationTextView = (TextView) itemView.findViewById(R.id.location_text_view);
@@ -71,16 +71,18 @@ public class TodayForecastFragment extends Fragment implements LoaderManager.Loa
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(TODAY_FRAGMENT_LOADER, null, this);
         adapter = new ForecastAdapter(getActivity());
-
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        Log.i("tag", "inside onCreateLoader");
+        //Log.i("tag", "inside onCreateLoader");
         if (i == TODAY_FRAGMENT_LOADER) {
             String locationString = WeatherUtility.getPreferredLocation(getActivity());
             String sortOrder = WeatherContract.WeatherEntry.DATE + " ASC";
-            Uri weatherForLocationUri = WeatherContract.WeatherEntry.weatherWithLocationUri(locationString);
+            //Log.i("tag","TodayForecast time " + new GregorianCalendar().getTimeInMillis());
+            FetchWeatherTask task = new FetchWeatherTask(getActivity());
+
+            Uri weatherForLocationUri = WeatherContract.WeatherEntry.weatherWithLocationAndDateUri(locationString, task.getTimeFromDatabase());
             return new CursorLoader(getActivity(), weatherForLocationUri, FORECAST_COLUMNS, null, null, sortOrder);
         }
         return null;
@@ -89,11 +91,11 @@ public class TodayForecastFragment extends Fragment implements LoaderManager.Loa
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (loader.getId() == TODAY_FRAGMENT_LOADER) {
-            Log.i("tag", "inside onLoadFinished");
+            //Log.i("tag", "inside onLoadFinished");
             if (cursor != null) {
                 this.cursor = cursor;
                 setupData(cursor);
-                Log.i("tag", "I Got the CURSOR with " + cursor.getCount() + " rows");
+                //Log.i("tag", "I Got the CURSOR with " + cursor.getCount() + " rows");
             } else Toast.makeText(getActivity(), "Bad Luck Again!", Toast.LENGTH_SHORT).show();
         }
     }
@@ -106,7 +108,7 @@ public class TodayForecastFragment extends Fragment implements LoaderManager.Loa
 
     void setupData(Cursor cursor) {
 
-        if (cursor != null && cursor.getCount() > 0) {
+        if (cursor.getCount() > 0) {
             cursor.moveToFirst();
             int weatherId = cursor.getInt(ForecastListFragment.COL_WEATHER_CONDITION_ID);
             // Log.i("tag", " " + weatherId);
@@ -139,7 +141,7 @@ public class TodayForecastFragment extends Fragment implements LoaderManager.Loa
             //Log.i("tag", cityName);
             locationTextView.setText(cityName);
         } else {
-            Toast.makeText(getActivity(), "Bad Luck!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Failed to update UI", Toast.LENGTH_SHORT).show();
         }
     }
 
