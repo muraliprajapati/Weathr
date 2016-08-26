@@ -1,14 +1,16 @@
 package com.example.murali.weathr;
 
-import android.app.Fragment;
-import android.app.LoaderManager;
-import android.content.CursorLoader;
-import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -54,7 +56,7 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
     ForecastAdapter mAdapter;
     RecyclerView mRecyclerView;
     RecyclerView.LayoutManager mLayoutManager;
-
+    ViewPager pager;
 
     @Nullable
     @Override
@@ -67,11 +69,16 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
         locationQuery = WeatherUtility.getPreferredLocation(getActivity());
 
 
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.forecastRecyclerView);
-        mLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new ForecastAdapter(getActivity());
-        mRecyclerView.setAdapter(mAdapter);
+//        mRecyclerView = (RecyclerView) view.findViewById(R.id.forecastRecyclerView);
+//        mLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
+//        mRecyclerView.setLayoutManager(mLayoutManager);
+        pager = (ViewPager) view.findViewById(R.id.forecastRecyclerView);
+        pager.setClipToPadding(false);
+        pager.setPadding(40, 0, 160, 40);
+        pager.setPageMargin(40);
+//        mAdapter = new ForecastAdapter(getActivity());
+
+//        mRecyclerView.setAdapter(mAdapter);
         return view;
     }
 
@@ -81,9 +88,6 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
         getLoaderManager().initLoader(LIST_FRAGMENT_LOADER, null, this);
 
     }
-
-
-
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
@@ -99,14 +103,14 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (loader.getId() == LIST_FRAGMENT_LOADER) {
-            mAdapter.swapCursor(cursor);
-
+//            mAdapter.swapCursor(cursor);
+            pager.setAdapter(new ForecastPagerAdapter(getActivity().getSupportFragmentManager(), cursor));
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
+//        mAdapter.swapCursor(null);
     }
 
 
@@ -114,4 +118,26 @@ public class ForecastListFragment extends Fragment implements LoaderManager.Load
         Log.i("tag", "loader restarted");
         getLoaderManager().restartLoader(LIST_FRAGMENT_LOADER, null, this);
     }
+
+    class ForecastPagerAdapter extends FragmentStatePagerAdapter {
+        Cursor cursor;
+
+        public ForecastPagerAdapter(FragmentManager fm, Cursor cursor) {
+            super(fm);
+            this.cursor = cursor;
+        }
+
+
+        @Override
+        public android.support.v4.app.Fragment getItem(int position) {
+            return WeatherCard.newInstance(position, cursor);
+        }
+
+        @Override
+        public int getCount() {
+            return 6;
+        }
+    }
 }
+
+

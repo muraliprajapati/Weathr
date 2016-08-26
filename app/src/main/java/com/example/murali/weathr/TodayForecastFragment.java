@@ -47,7 +47,7 @@ public class TodayForecastFragment extends Fragment implements LoaderManager.Loa
     TextView descriptionTextView;
     TextView dateTextView;
     TextView highTempTextView;
-    TextView lowTempTextView;
+//    TextView lowTempTextView;
 
     @Nullable
     @Override
@@ -60,7 +60,7 @@ public class TodayForecastFragment extends Fragment implements LoaderManager.Loa
         descriptionTextView = (TextView) itemView.findViewById(R.id.description_text_view);
         dateTextView = (TextView) itemView.findViewById(R.id.date_text_view);
         highTempTextView = (TextView) itemView.findViewById(R.id.high_temp_text_view);
-        lowTempTextView = (TextView) itemView.findViewById(R.id.low_temp_text_view);
+//        lowTempTextView = (TextView) itemView.findViewById(R.id.low_temp_text_view);
 
         return itemView;
 
@@ -80,9 +80,8 @@ public class TodayForecastFragment extends Fragment implements LoaderManager.Loa
             String locationString = WeatherUtility.getPreferredLocation(getActivity());
             String sortOrder = WeatherContract.WeatherEntry.DATE + " ASC";
             //Log.i("tag","TodayForecast time " + new GregorianCalendar().getTimeInMillis());
-            FetchWeatherTask task = new FetchWeatherTask(getActivity());
 
-            Uri weatherForLocationUri = WeatherContract.WeatherEntry.weatherWithLocationAndDateUri(locationString, task.getTimeFromDatabase());
+            Uri weatherForLocationUri = WeatherContract.WeatherEntry.weatherWithLocationUri(locationString);
             return new CursorLoader(getActivity(), weatherForLocationUri, FORECAST_COLUMNS, null, null, sortOrder);
         }
         return null;
@@ -135,13 +134,11 @@ public class TodayForecastFragment extends Fragment implements LoaderManager.Loa
 
             double low = cursor.getDouble(ForecastListFragment.COL_WEATHER_MIN_TEMP);
             String lowString = WeatherUtility.formatTemperature(getActivity(), low);
-            lowTempTextView.setText(lowString);
+//            lowTempTextView.setText(lowString);
 
             String cityName = cursor.getString(ForecastListFragment.COL_CITY_NAME);
             //Log.i("tag", cityName);
             locationTextView.setText(cityName);
-        } else {
-            Toast.makeText(getActivity(), "Failed to update UI", Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -1,7 +1,6 @@
-<android.support.v7.widget.RecyclerView xmlns:app="http://schemas.android.com/apk/res/android"
+<android.support.v4.view.ViewPager xmlns:app="http://schemas.android.com/apk/res/android"
     app:id="@+id/forecastRecyclerView"
     app:layout_width="match_parent"
-    app:layout_height="wrap_content"
-    app:scrollbars="vertical">
+    app:layout_height="wrap_content">
 
-</android.support.v7.widget.RecyclerView>
+</android.support.v4.view.ViewPager>

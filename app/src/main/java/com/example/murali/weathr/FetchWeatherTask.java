@@ -3,9 +3,11 @@ package com.example.murali.weathr;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.example.murali.weathr.database.WeatherContract;
@@ -90,6 +92,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
     @Override
     protected void onPostExecute(Void result) {
         super.onPostExecute(result);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent("restart"));
     }
 
     private String readJSON(InputStream inputStream) throws IOException {
@@ -114,11 +117,12 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
         } else {
             Log.i("tag", "In if false");
             getContext().getContentResolver().insert(WeatherContract.WeatherEntry.CONTENT_URI, contentValues);
+            getContext().getContentResolver().delete(WeatherContract.WeatherEntry.CONTENT_URI,
+                    WeatherContract.WeatherEntry.DATE + " < ?",
+                    new String[]{Long.toString(getTime())});
         }
 
-        getContext().getContentResolver().delete(WeatherContract.WeatherEntry.CONTENT_URI,
-                WeatherContract.WeatherEntry.DATE + " < ?",
-                new String[]{Long.toString(getTime())});
+
     }
 
     private boolean isInWeatherDatabase(int givenDay, int index) {

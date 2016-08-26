@@ -1,0 +1,51 @@
+{
+  "project_info": {
+    "project_id": "events-593c8",
+    "project_number": "3004673646",
+    "name": "Events"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:3004673646:android:fe3dd5b9689d38d3",
+        "client_id": "android:com.example.murali.events",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "com.example.murali.events"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "3004673646-2klse2ruhcaathisb6actt0vcnbf5njs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.murali.events",
+            "certificate_hash": "61109c6e01f72134dedb13d4d08bcc4724ed021f"
+          }
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 2
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}
