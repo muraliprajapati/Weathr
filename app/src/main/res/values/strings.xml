@@ -9,6 +9,8 @@
     <string name="pref_unit_title">Tempreture unit</string>
     <string name="pref_unit_default_value">Metric</string>
     <string name="pref_unit_key">tempretureUnit</string>
+    <string name="pref_show_notification">Show notification</string>
+    <string name="pref_show_notification_key">notification</string>
     <string-array name="tempUnitEntryValues">
         <item>metric</item>
         <item>imperial</item>
@@ -24,6 +26,7 @@
     <string name="format_full_friendly_date"><xliff:g id="month">%1$s</xliff:g>, <xliff:g id="day">%2$s</xliff:g></string>
 
     <string name="format_temperature"><xliff:g id="temp">%1.0f</xliff:g>\u00B0</string>
+    <string name="notification_string"><xliff:g id="temp">%1.0f</xliff:g>\u00B0 <xliff:g id="desc">%2$s</xliff:g></string>
 
     <!-- Weather Conditions -->
     <string name="condition_2xx">Storm</string>

@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     FetchWeatherTask task;
     LocalBroadcastManager broadcastManager;
     BroadcastReceiver receiver;
+    ForecastNotification notification;
 
 
     @Override
@@ -39,6 +40,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 restartAllLoaders();
             }
         };
+        notification = new ForecastNotification(this);
+        if (isNotificationEnabled())
+            notification.show();
 
 
     }
@@ -90,12 +94,17 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         task = new FetchWeatherTask(this);
         task.execute(location);
         restartAllLoaders();
+        notification.show();
     }
 
 
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-        updateWeather();
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.pref_show_notification_key))) {
+            if (isNotificationEnabled()) notification.show();
+            else notification.hide();
+        } else
+            updateWeather();
     }
 
     void restartAllLoaders() {
@@ -103,5 +112,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         listFragment.restart();
     }
 
+    boolean isNotificationEnabled() {
+        return WeatherUtility.isNotificationEnabled(this);
+    }
 
 }

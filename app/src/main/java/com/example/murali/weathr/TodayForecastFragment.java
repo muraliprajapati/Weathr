@@ -129,11 +129,11 @@ public class TodayForecastFragment extends Fragment implements LoaderManager.Loa
             descriptionTextView.setText(descriptionText);
 
             double high = cursor.getDouble(ForecastListFragment.COL_WEATHER_MAX_TEMP);
-            String highString = WeatherUtility.formatTemperature(getActivity(), high);
-            highTempTextView.setText(highString);
+//            String highString = WeatherUtility.formatTemperature(getActivity(), high);
+            highTempTextView.setText(WeatherUtility.formatTemperature(getActivity(), high));
 
             double low = cursor.getDouble(ForecastListFragment.COL_WEATHER_MIN_TEMP);
-            String lowString = WeatherUtility.formatTemperature(getActivity(), low);
+//            String lowString = WeatherUtility.formatTemperature(getActivity(), low);
 //            lowTempTextView.setText(lowString);
 
             String cityName = cursor.getString(ForecastListFragment.COL_CITY_NAME);

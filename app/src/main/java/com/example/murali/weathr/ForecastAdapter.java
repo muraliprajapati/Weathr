@@ -58,12 +58,12 @@ class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHolder> {
         holder.descriptionTextView.setText(descriptionText);
 
         double high = cursor.getDouble(ForecastListFragment.COL_WEATHER_MAX_TEMP);
-        String highString = WeatherUtility.formatTemperature(context, high);
-        holder.highTempTextView.setText(highString);
+//        String highString = WeatherUtility.formatTemperature(context, high);
+        holder.highTempTextView.setText(WeatherUtility.formatTemperature(context, high));
 
         double low = cursor.getDouble(ForecastListFragment.COL_WEATHER_MIN_TEMP);
-        String lowString = WeatherUtility.formatTemperature(context, low);
-        holder.lowTempTextView.setText(lowString);
+//        String lowString = WeatherUtility.formatTemperature(context, low);
+//        holder.lowTempTextView.setText(lowString);
 
         String cityName = cursor.getString(ForecastListFragment.COL_CITY_NAME);
         //Log.i("tag", cityName);

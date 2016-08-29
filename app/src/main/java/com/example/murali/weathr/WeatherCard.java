@@ -73,8 +73,8 @@ public class WeatherCard extends Fragment {
             descriptionTextView.setText(descriptionText);
 
             double high = cursor.getDouble(ForecastListFragment.COL_WEATHER_MAX_TEMP);
-            String highString = WeatherUtility.formatTemperature(getActivity(), high);
-            highTempTextView.setText(highString);
+//            String highString = WeatherUtility.formatTemperature(getActivity(), high);
+            highTempTextView.setText(WeatherUtility.formatTemperature(getActivity(), high));
         }
     }
 }

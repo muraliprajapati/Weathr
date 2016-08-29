@@ -3,6 +3,11 @@ package com.example.murali.weathr;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.SuperscriptSpan;
+import android.util.Log;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -14,10 +19,10 @@ import java.util.GregorianCalendar;
  * Created by Murali on 17/12/2015.
  */
 public class WeatherUtility {
-
     // Format used for storing dates in the database.  ALso used for converting those strings
     // back into date objects for comparison/processing.
     public static final String DATE_FORMAT = "yyyyMMdd";
+    private static final String TAG = "WeatherUtility";
 
     public static String getPreferredLocation(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -28,6 +33,11 @@ public class WeatherUtility {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String[] units = context.getResources().getStringArray(R.array.tempUnitEntryValues);
         return prefs.getString(context.getString(R.string.pref_unit_key), units[0]).equals(units[0]);
+    }
+
+    public static boolean isNotificationEnabled(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(context.getString(R.string.pref_show_notification_key), true);
     }
 
     public static int getIconResourceForWeatherCondition(int weatherId) {
@@ -360,16 +370,32 @@ public class WeatherUtility {
         return monthDayString;
     }
 
-    public static String formatTemperature(Context context, double temperature) {
+    public static SpannableStringBuilder formatTemperature(Context context, double temperature) {
         // Data stored in Celsius by default.  If user prefers to see in Fahrenheit, convert
         // the values here.
-        String suffix = "\u00B0";
+        String suffix = "C";
         if (!isMetric(context)) {
             temperature = (temperature * 1.8) + 32;
+            suffix = "F";
         }
 
         // For presentation, assume the user doesn't care about tenths of a degree.
-        return String.format(context.getString(R.string.format_temperature), temperature);
+//        outputText.setText(Html.fromHtml("<sup>" + num + "</sup>/<sub>" + den + "</sub>"));
+        String s = String.format(context.getString(R.string.format_temperature), temperature) + suffix;
+        SpannableStringBuilder cs = new SpannableStringBuilder(s);
+        cs.setSpan(new SuperscriptSpan(), 2, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        cs.setSpan(new RelativeSizeSpan(0.4f), 2, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return cs;
+    }
+
+    public static String getNotificationString(Context context, double temperature, String desc) {
+        String suffix = "\u00B0C";
+        if (!isMetric(context)) {
+            temperature = (temperature * 1.8) + 32;
+            suffix = "\u00B0F";
+        }
+        Log.i(TAG, "getNotificationString: " + isMetric(context));
+        return String.format("%1.0f%s %s", temperature, suffix, desc);
     }
 
     public static boolean isFirstRun(Context context) {

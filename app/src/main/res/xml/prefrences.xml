@@ -13,5 +13,10 @@
         android:key="@string/pref_unit_key"
         android:title="@string/pref_unit_title" />
 
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="@string/pref_show_notification_key"
+        android:title="@string/pref_show_notification" />
+
 
 </PreferenceScreen>
